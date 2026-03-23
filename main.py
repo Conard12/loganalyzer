@@ -17,6 +17,7 @@ except ImportError as e:
 def main():
     parser = argparse.ArgumentParser(description="LogAnalyzer Pro - Module 4 Orchestration")
     parser.add_argument("cible", help="Nom du fichier log dans logs_test ou chemin absolu")
+    parser.add_argument("--niveau", default="ALL", choices=["ERROR", "WARN", "INFO", "ALL"], help="Niveau de filtrage")
     parser.add_argument("--archive", action="store_true", help="Archiver après traitement")
     
     args = parser.parse_args()
@@ -37,7 +38,7 @@ def main():
     # 1. Étape d'Analyse (Module 1)
     try:
         print("[1/3] Analyse des logs...")
-        stats = analyser_logs(chemin_cible)
+        stats = analyser_logs(chemin_cible, args.niveau)
         if stats is None:
             raise ValueError("Le module d'analyse a retourné None.")
     except Exception as e:
