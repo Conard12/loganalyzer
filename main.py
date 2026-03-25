@@ -30,8 +30,11 @@ def main():
     # Construction du chemin absolu de la cible
     if os.path.isabs(args.cible):
         chemin_cible = args.cible
+    elif os.path.exists(args.cible):
+        # Si le chemin existe déjà tel quel (ex: "logs_test" ou un fichier local)
+        chemin_cible = os.path.abspath(args.cible)
     else:
-        # On assume que c'est dans logs_test si c'est un nom simple
+        # On assume que c'est dans logs_test si c'est un nom simple absent du dossier local
         chemin_cible = os.path.join(BASE_DIR, "logs_test", args.cible)
     
     if not os.path.exists(chemin_cible):
@@ -56,7 +59,8 @@ def main():
         nom_log = os.path.basename(chemin_cible)
         # Chemin absolu pour le dossier rapports
         dossier_rapports = os.path.join(BASE_DIR, "rapports")
-        succes_rapport = generer_rapport(stats, nom_log, dossier_rapports)
+        # On passe uniquement la partie statistiques au module de rapport
+        succes_rapport = generer_rapport(stats["statistiques"], nom_log, dossier_rapports)
         if not succes_rapport:
             print("AVERTISSEMENT : La génération du rapport a échoué.")
         

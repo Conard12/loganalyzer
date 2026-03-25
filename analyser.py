@@ -133,7 +133,9 @@ def analyser_logs(chemin_source, niveau_filtrage="ALL"):
         # Nombre total de lignes validées par le filtre
         "total_lignes": total_lignes,
         # Ajout des totaux par niveau (filtré ou complet)
-        "par_niveau": par_niveau
+        "par_niveau": par_niveau,
+        # Ajout de la liste des fichiers traités (noms de base pour le rapport)
+        "fichiers_traites": [os.path.basename(f) for f in fichiers_a_traiter]
     }
     
     # Condition : si on a du ERROR ou du ALL, on inclut le Top 5 des messages d'erreurs
