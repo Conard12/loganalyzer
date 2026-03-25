@@ -6,10 +6,13 @@ import argparse
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Importation des modules
+import sys
+sys.path.insert(0, BASE_DIR)
+
 try:
     from analyser import analyser_logs
     from rapport import generer_rapport
-    from archiver import archiver_log
+    from archiver import archiver_log, nettoyer_anciens_rapports
 except ImportError as e:
     print(f"ERREUR FATALE : Impossible d'importer les modules nécessaires : {e}")
     sys.exit(1)
@@ -19,6 +22,8 @@ def main():
     parser.add_argument("cible", help="Nom du fichier log dans logs_test ou chemin absolu")
     parser.add_argument("--niveau", default="ALL", choices=["ERROR", "WARN", "INFO", "ALL"], help="Niveau de filtrage")
     parser.add_argument("--archive", action="store_true", help="Archiver après traitement")
+    parser.add_argument("--dest", default=os.path.join(BASE_DIR, "backups"), help="Dossier de destination pour les archives")
+    parser.add_argument("--retention", type=int, default=30, help="Nombre de jours de rétention des rapports")
     
     args = parser.parse_args()
     
@@ -54,6 +59,9 @@ def main():
         succes_rapport = generer_rapport(stats, nom_log, dossier_rapports)
         if not succes_rapport:
             print("AVERTISSEMENT : La génération du rapport a échoué.")
+        
+        # Nettoyage des anciens rapports (Module 3 exigence)
+        nettoyer_anciens_rapports(dossier_rapports, args.retention)
     except Exception as e:
         print(f"ERREUR CRITIQUE (Rapport) : {e}")
         # On peut décider si c'est fatal ou non. Ici on considère que oui pour respecter la consigne.
@@ -63,8 +71,8 @@ def main():
     if args.archive:
         try:
             print("[3/3] Archivage du fichier...")
-            # Chemin absolu pour le dossier backups
-            dossier_backups = os.path.join(BASE_DIR, "backups")
+            # On utilise le dossier spécifié par --dest ou par défaut
+            dossier_backups = args.dest if os.path.isabs(args.dest) else os.path.join(BASE_DIR, args.dest)
             succes_archive = archiver_log(chemin_cible, dossier_backups)
             if not succes_archive:
                 print("AVERTISSEMENT : L'archivage a échoué.")
